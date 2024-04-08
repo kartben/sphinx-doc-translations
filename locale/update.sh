@@ -14,7 +14,13 @@ cd `dirname $0`
 sphinx-build -T -b gettext ../sphinx/doc pot
 sphinx-intl update-txconfig-resources -p pot -d .
 cat .tx/config
-tx push -s --skip
+
+# Before pulling, push source strings,
+# skip pushing if not scheduled run in GitHub Actions
+if [[ -n "${CI}" && "${GITHUB_EVENT_NAME}" == "schedule" ]]; then
+  tx push -s --skip
+fi
+
 rm -R -f ar ca_ES zh_CN fr de it_IT ja ko pl_PL pt_BR ru sr es
 tx pull --silent -f -l ar,ca_ES,zh_CN,fr,de,it_IT,ja,ko,pl_PL,pt_BR,ru,sr,es
 git checkout .tx/config
